@@ -1,0 +1,45 @@
+name: Golden Pipeline - CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Instalar Dependências
+        run: echo "Instalando dependências..."
+
+      - name: Executar Testes
+        run: echo "Rodando testes automatizados..."
+
+  build-and-push-image:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configurar AWS Credenciais
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login no Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build da Imagem Docker
+        run: |
+          docker build -t ${{ inputs.service_name }}:latest .
+          docker tag ${{ inputs.service_name }}:latest <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.service_name }}:latest
+          docker push <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.service_name }}:latest
