@@ -48,9 +48,8 @@ jobs:
 
       - name: Criar tag da imagem
         run: |
-          docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+          docker tag ${{ secrets.ECR_REPOSITORY }}:latest public.ecr.aws/a9u2f8e7/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: Enviar imagem para o ECR
         run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+          docker push public.ecr.aws/a9u2f8e7/${{ secrets.ECR_REPOSITORY }}:latest
