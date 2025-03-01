@@ -45,6 +45,10 @@ jobs:
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/a9u2f8e7
 
+      - name: Listando diretorio    
+        run: |
+          ls -l | pwd
+
       - name: Construir a imagem Docker
         run: |
           docker build -f ./Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:latest .
