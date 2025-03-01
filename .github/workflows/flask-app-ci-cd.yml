@@ -48,7 +48,7 @@ jobs:
       - name: Listando diretorio    
         run: |
           pwd
-          ls -lha
+          ls -Rlha
 
       - name: Construir a imagem Docker
         run: |
