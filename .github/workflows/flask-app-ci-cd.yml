@@ -20,10 +20,13 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Código
+      - name: Checkout do código
         uses: actions/checkout@v4
+      - name: Salvar arquivos como artefato
+        uses: actions/upload-artifact@v3
         with:
-          ref: feature-flask-app
+          name: flask-app-files
+          path: ./
 
       - name: Instalar Dependências
         run: echo "Instalando dependências..."
