@@ -47,7 +47,7 @@ jobs:
 
       - name: Listando diretorio    
         run: |
-          ls -l | pwd
+          ls -l /home/runner/work/flask-app
 
       - name: Construir a imagem Docker
         run: |
