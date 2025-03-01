@@ -49,7 +49,12 @@ jobs:
       - name: Fazer login no Amazon ECR
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/a9u2f8e7
-
+        
+      - name: Baixar artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: flask-app-files
+        
       - name: Listando diretorio    
         run: |
           pwd
