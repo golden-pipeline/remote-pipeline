@@ -35,10 +35,8 @@ jobs:
     needs: checkout-and-test
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar artefatos
-        uses: actions/download-artifact@v4
-        with:
-          name: flask-app-files
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
       - name: Ler versão do package.json
         id: get_version
@@ -49,7 +47,10 @@ jobs:
   
       - name: Obter SHA do commit
         id: get_sha
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+          echo "SHA do commit: $SHORT_SHA"
 
       - name: Login no Docker Hub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -80,5 +81,5 @@ jobs:
       - name: Enviar imagem para o repositório
         run: |
           IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
-          docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG .
+          docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG
           docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
