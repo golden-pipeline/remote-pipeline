@@ -35,11 +35,21 @@ jobs:
     needs: checkout-and-test
     runs-on: ubuntu-latest
     steps:
-
       - name: Baixar artefatos
         uses: actions/download-artifact@v4
         with:
           name: flask-app-files
+
+      - name: Ler versão do package.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Versão extraída: $VERSION"
+  
+      - name: Obter SHA do commit
+        id: get_sha
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Login no Docker Hub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -59,10 +69,16 @@ jobs:
             echo "Repositório já existe."
           fi
 
-      - name: Construir a imagem Docker
+      - name: Construir e taguear a imagem
+        env:
+          IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-app:latest .     
-
-      - name: Enviar imagem para o DOCKERHUB
+          IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG .
+          docker tag meu-repositorio/myapp:$IMAGE_TAG meu-repositorio/myapp:latest
+  
+      - name: Enviar imagem para o repositório
         run: |
+          IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
+          docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG .
           docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
