@@ -75,7 +75,7 @@ jobs:
         run: |
           IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG .
-          docker tag meu-repositorio/myapp:$IMAGE_TAG meu-repositorio/myapp:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/flask-app:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
   
       - name: Enviar imagem para o repositório
         run: |
