@@ -54,16 +54,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: flask-app-files
-        
-      - name: Listando diretorio    
-        run: |
-          pwd
-          ls -Rlha
-
-      - name: Mostrar estrutura de arquivos
-        run: |
-          pwd
-          ls -Rlha /home/runner/work/flask-app
 
       - name: Construir a imagem Docker
         run: |
