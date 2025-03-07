@@ -109,8 +109,8 @@ jobs:
             echo "Repositório já existe."
           fi
 
-          - name: Recuperar tag da imagem
-          run: echo "IMAGE_TAG=${{ needs.checkout-and-test.outputs.image_tag }}" >> $GITHUB_ENV
+      - name: Recuperar tag da imagem
+        run: echo "IMAGE_TAG=${{ needs.checkout-and-test.outputs.image_tag }}" >> $GITHUB_ENV
   
       - name: Construir e taguear a imagem
         run: |
