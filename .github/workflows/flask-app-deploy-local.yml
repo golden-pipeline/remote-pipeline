@@ -136,6 +136,9 @@ jobs:
           ref: feature-manifestos
           token: ${{ secrets.GH_ACCESS_TOKEN }}
 
+      - name: Recuperar tag da imagem
+        run: echo "IMAGE_TAG=${{ needs.checkout-and-test.outputs.image_tag }}" >> $GITHUB_ENV
+
       - name: Atualizar imagem do Frontend
         run: |
           echo "Tag da imagem: ${{ needs.checkout-and-test.outputs.image_tag }}"
