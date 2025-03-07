@@ -80,6 +80,12 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ./frontend
           docker tag ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/react:latest
 
+      - name: Enviar imagem para o repositório
+        run: |
+          IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
+          docker push ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG
+          docker push ${{ secrets.DOCKER_USERNAME }}/react:latest
+
   build-and-push-image-backend:
     needs: checkout-and-test
     runs-on: ubuntu-latest
