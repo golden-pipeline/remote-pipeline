@@ -150,6 +150,7 @@ jobs:
           echo "Tag da imagem: ${{ needs.checkout-and-test.outputs.image_tag }}"
           IMAGE_TAG="${{ needs.checkout-and-test.outputs.image_tag }}"
           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG|" k8s/backend/deployment.yaml
+          cat k8s/backend/deployment.yaml
 
       - name: Commit e push das alterações
         run: |
