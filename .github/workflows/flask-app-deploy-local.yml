@@ -81,7 +81,7 @@ jobs:
           docker tag ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/react:latest
 
   build-and-push-image-backend:
-    needs: checkout-and-test
+    needs: build-and-push-image-frontend
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.get_version.outputs.IMAGE_TAG }}  # Exporta a tag da imagem
