@@ -71,9 +71,6 @@ jobs:
             echo "Repositório já existe."
           fi
 
-      - name: Instalando dependencias
-        run: yarn install
-
       - name: Construir e taguear a imagem
         env:
           IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
@@ -151,20 +148,26 @@ jobs:
       - name: Clonar repositório dos manifestos do Kubernetes
         uses: actions/checkout@v4
         with:
-          repository: golden-pipeline/flask-app-k8s
+          repository: golden-pipeline/to-do-list-k8s
           ref: feature-manifestos
           token: ${{ secrets.GH_ACCESS_TOKEN }}
-        
-      - name: Atualizar imagem no deployment.yaml
+
+      - name: Atualizar imagem do Frontend
         run: |
           echo "Tag da imagem: ${{ needs.build-and-push-image.outputs.image_tag }}"
           IMAGE_TAG="${{ needs.build-and-push-image.outputs.image_tag }}"
-          sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG|" k8s/application/deployment.yaml
+          sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG|" k8s/frontend/deployment.yaml
+        
+      - name: Atualizar imagem do Backend
+        run: |
+          echo "Tag da imagem: ${{ needs.build-and-push-image.outputs.image_tag }}"
+          IMAGE_TAG="${{ needs.build-and-push-image.outputs.image_tag }}"
+          sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG|" k8s/backend/deployment.yaml
 
       - name: Commit e push das alterações
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add k8s/application/deployment.yaml
-          git commit -m "Atualizando imagem para flask:${{ needs.build-and-push-image.outputs.image_tag }}"
+          git add .
+          git commit -m "Atualizando imagens da aplicação:${{ needs.build-and-push-image.outputs.image_tag }}"
           git push origin feature-manifestos
