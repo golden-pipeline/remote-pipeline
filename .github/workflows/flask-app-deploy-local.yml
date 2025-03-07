@@ -31,7 +31,7 @@ jobs:
       - name: Obter e Criar tag da imagem docker
         id: get_version
         run: |
-          VERSION=$(jq -r .version package.json)
+          VERSION=$(jq -r .version frontend/package.json)
           SHORT_SHA=$(git rev-parse --short HEAD)
           IMAGE_TAG="$VERSION-$SHORT_SHA"
   
@@ -143,14 +143,11 @@ jobs:
         run: |
           echo "Tag da imagem: $IMAGE_TAG"
           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG|" k8s/frontend/deployment.yaml
-          cat k8s/frontend/deployment.yaml
         
       - name: Atualizar imagem do Backend
         run: |
-          echo "Tag da imagem: ${{ needs.checkout-and-test.outputs.image_tag }}"
-          IMAGE_TAG="${{ needs.checkout-and-test.outputs.image_tag }}"
+          echo "Tag da imagem: $IMAGE_TAG"
           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG|" k8s/backend/deployment.yaml
-          cat k8s/backend/deployment.yaml
 
       - name: Commit e push das alterações
         run: |
@@ -158,5 +155,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add k8s/frontend/deployment.yaml
           git add k8s/backend/deployment.yaml
-          git commit -m "Atualizando imagens da aplicação:${{ needs.checkout-and-test.outputs.image_tag }}"
+          git commit -m "Atualizando imagens da aplicação:$$IMAGE_TAG"
           git push origin feature-manifestos
