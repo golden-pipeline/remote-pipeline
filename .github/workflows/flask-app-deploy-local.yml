@@ -27,13 +27,60 @@ jobs:
           name: flask-files
           path: ./
 
-      - name: Instalar Dependências
-        run: echo "Instalando dependências..."
+  build-and-push-image-frontend:
+    needs: checkout-and-test
+    runs-on: ubuntu:latest
+    outputs:
+      image_tag: ${{ steps.get_version.outputs.IMAGE_TAG }}  # Exporta a tag da imagem
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
-      - name: Executar Testes
-        run: echo "Rodando testes automatizados..."
+      - name: Obter e Criar tag da imagem docker
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          IMAGE_TAG="$VERSION-$SHORT_SHA"
 
-  build-and-push-image:
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+          echo "Versão extraída: $VERSION"
+          echo "SHA do commit: $SHORT_SHA"
+          echo "Tag da imagem gerada: $IMAGE_TAG"
+          
+      - name: Login no Docker Hub
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Verificar se o repositório já existe no Docker Hub
+        id: check_repo
+        run: |
+          REPO_NAME=${{ secrets.DOCKER_USERNAME }}/react
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/${{ secrets.DOCKER_USERNAME }}/react/")
+          if [ "$STATUS" == "404" ]; then
+            echo "Repositório não encontrado. Criando..."
+            curl -X POST -H "Content-Type: application/json" \
+              -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" \
+              -d '{"name": "react", "is_private": false}' \
+              https://hub.docker.com/v2/repositories/${{ secrets.DOCKER_USERNAME }}/
+          else
+            echo "Repositório já existe."
+          fi
+
+      - name: Construir e taguear a imagem
+        env:
+          IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
+        run: |
+          IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
+          ls -lha
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ./frontend
+          docker tag ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/react:latest
+
+  build-and-push-image-backend:
     needs: checkout-and-test
     runs-on: ubuntu-latest
     outputs:
@@ -93,7 +140,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/flask:latest
 
   deploy-argocd:
-    needs: build-and-push-image
+    needs: build-and-push-image-backend
     runs-on: ubuntu-latest
     steps:
       - name: Clonar repositório dos manifestos do Kubernetes
