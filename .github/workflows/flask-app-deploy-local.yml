@@ -76,7 +76,6 @@ jobs:
           IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
         run: |
           IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
-          ls -lha
           docker build -t ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ./frontend
           docker tag ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/react:latest
 
@@ -135,7 +134,6 @@ jobs:
           IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
         run: |
           IMAGE_TAG="${{ env.VERSION }}-${{ env.SHORT_SHA }}"
-          ls -lha
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG ./backend
           docker tag ${{ secrets.DOCKER_USERNAME }}/flask:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/flask:latest
   
@@ -159,6 +157,8 @@ jobs:
           token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Atualizar imagem do Frontend
+        env:
+          IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
         run: |
           echo "Tag da imagem: ${{ needs.build-and-push-image.outputs.image_tag }}"
           IMAGE_TAG="${{ needs.build-and-push-image.outputs.image_tag }}"
