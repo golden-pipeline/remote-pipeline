@@ -71,6 +71,9 @@ jobs:
             echo "Repositório já existe."
           fi
 
+      - name: Instalando dependencias
+        run: yarn install
+
       - name: Construir e taguear a imagem
         env:
           IMAGE_TAG: "${{ env.VERSION }}-${{ env.SHORT_SHA }}"
@@ -123,9 +126,6 @@ jobs:
           else
             echo "Repositório já existe."
           fi
-
-      - name: Instalando dependencias
-        run: yarn install
 
       - name: Construir e taguear a imagem
         env:
