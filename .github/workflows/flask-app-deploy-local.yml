@@ -141,9 +141,9 @@ jobs:
 
       - name: Atualizar imagem do Frontend
         run: |
-          echo "Tag da imagem: ${{ needs.checkout-and-test.outputs.image_tag }}"
-          IMAGE_TAG="${{ needs.checkout-and-test.outputs.image_tag }}"
+          echo "Tag da imagem: $IMAGE_TAG"
           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/react:$IMAGE_TAG|" k8s/frontend/deployment.yaml
+          cat k8s/frontend/deployment.yaml
         
       - name: Atualizar imagem do Backend
         run: |
