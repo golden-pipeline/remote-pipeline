@@ -1,0 +1,68 @@
+name: Golden Pipeline - CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      ECR_REPOSITORY:
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+      - name: Salvar arquivos como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: flask-app-files
+          path: ./
+
+      - name: Instalar Dependências
+        run: echo "Instalando dependências..."
+
+      - name: Executar Testes
+        run: echo "Rodando testes automatizados..."
+
+  build-and-push-image:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configurar AWS Credenciais
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          ecr_repository: ${{ secrets.ECR_REPOSITORY }}
+
+      - name: Fazer login no Amazon ECR
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/a9u2f8e7
+        
+      - name: Baixar artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: flask-app-files
+
+      - name: Construir a imagem Docker
+        run: |
+          docker build -t ${{ secrets.ECR_REPOSITORY }}:latest .     
+
+      - name: Criar tag da imagem
+        run: |
+          docker tag ${{ secrets.ECR_REPOSITORY }}:latest public.ecr.aws/a9u2f8e7/${{ secrets.ECR_REPOSITORY }}:latest
+
+      - name: Enviar imagem para o ECR
+        run: |
+          docker push public.ecr.aws/a9u2f8e7/${{ secrets.ECR_REPOSITORY }}:latest
