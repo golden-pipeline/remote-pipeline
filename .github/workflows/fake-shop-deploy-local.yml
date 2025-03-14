@@ -93,7 +93,7 @@ jobs:
       - name: Clonar repositório dos manifestos do Kubernetes
         uses: actions/checkout@v4
         with:
-          repository: golden-pipeline/fake-shop
+          repository: golden-pipeline/manifestos-k8s
           ref: feature-ecommerce
           token: ${{ secrets.GH_ACCESS_TOKEN }}
 
