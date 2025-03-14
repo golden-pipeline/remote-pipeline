@@ -31,7 +31,7 @@ jobs:
       - name: Obter e Criar tag da imagem docker
         id: get_version
         run: |
-          VERSION=$(jq -r .version requirements.txt)
+          VERSION=$(jq -r .version src/requirements.txt)
           SHORT_SHA=$(git rev-parse --short HEAD)
           IMAGE_TAG="$VERSION-$SHORT_SHA"
   
