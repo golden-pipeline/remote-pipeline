@@ -111,4 +111,4 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add k8s/ecommerce/deployment.yaml
           git commit -m "Atualizando imagem da aplicação:$$IMAGE_TAG"
-          git push feature-ecommerce
+          git push origin feature-ecommerce
